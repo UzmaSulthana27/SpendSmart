@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base resets / globals */
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-gray-50 text-gray-800 antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Reusable components */
+@layer components {
+  .container-max {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow p-4;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500;
+  }
+}
+
+/* Helpers for charts and responsive behavior */
+.chart-wrapper {
+  height: 240px;
+  min-height: 160px;
+  width: 100%;
+}
+@media (max-width: 640px) {
+  .chart-wrapper { height: 200px; }
+}
+
+/* Small utilities */
+.hidden-scrollbar {
+  scrollbar-width: none; /* Firefox */
+}
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
