@@ -19,20 +19,61 @@ export default function TransactionForm({ initialType = "expense" }) {
   }
 
   return (
-    <form onSubmit={submit} className="max-w-xl mx-auto bg-white p-6 rounded-lg shadow space-y-4">
-      <h2 className="text-lg font-semibold">Add Transaction</h2>
+    <form onSubmit={submit} className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-lg space-y-5">
+      <h2 className="text-2xl font-semibold text-gray-800 text-center">Add Transaction</h2>
 
+      {/* Type Toggle */}
       <div className="flex gap-2">
-        <button type="button" onClick={() => setType("income")} className={`flex-1 py-2 rounded ${type === "income" ? "bg-green-600 text-white" : "bg-gray-100"}`}>Income</button>
-        <button type="button" onClick={() => setType("expense")} className={`flex-1 py-2 rounded ${type === "expense" ? "bg-red-600 text-white" : "bg-gray-100"}`}>Expense</button>
+        <button
+          type="button"
+          onClick={() => setType("income")}
+          className={`flex-1 py-2 rounded-lg font-medium transition-transform duration-200 ${
+            type === "income" ? "bg-green-600 text-white shadow-md scale-105" : "bg-gray-100 text-gray-700 hover:bg-green-100"
+          }`}
+        >
+          Income
+        </button>
+        <button
+          type="button"
+          onClick={() => setType("expense")}
+          className={`flex-1 py-2 rounded-lg font-medium transition-transform duration-200 ${
+            type === "expense" ? "bg-red-600 text-white shadow-md scale-105" : "bg-gray-100 text-gray-700 hover:bg-red-100"
+          }`}
+        >
+          Expense
+        </button>
       </div>
 
-      <input className="w-full p-2 border rounded" placeholder="Description" value={desc} onChange={(e) => setDesc(e.target.value)} />
-      <input className="w-full p-2 border rounded" placeholder="Category (optional)" value={category} onChange={(e) => setCategory(e.target.value)} />
-      <input className="w-full p-2 border rounded" placeholder="Amount" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} />
+      {/* Inputs */}
+      <input
+        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+        placeholder="Description"
+        value={desc}
+        onChange={(e) => setDesc(e.target.value)}
+      />
+      <input
+        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+        placeholder="Category (optional)"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+      />
+      <input
+        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+        placeholder="Amount"
+        type="number"
+        step="0.01"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+      />
 
+      {/* Submit Button */}
       <div className="flex justify-end">
-        <button className="btn-primary" type="submit">Add</button>
+        <button
+          type="submit"
+          className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:bg-indigo-700 transition-all transform hover:scale-105"
+        >
+          Add
+        </button>
       </div>
     </form>
   );
