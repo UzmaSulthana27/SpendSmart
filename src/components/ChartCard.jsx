@@ -12,7 +12,7 @@ const COLOR_BORDER = "#E5E7EB";           // Light border/separator color
 
 /**
  * Simple Income vs Expense pie chart with net balance display in the center.
- * This component uses a white background and dark navy text.
+ * This component now includes a slide-in animation on render.
  * props.data = [{ name: 'Income', value: 100 }, { name: 'Expense', value: 50 }]
  */
 export default function ChartCard({ data = [] }) {
@@ -27,11 +27,17 @@ export default function ChartCard({ data = [] }) {
   return (
     // Card Container: White background, Dark Navy text, subtle shadow and border
     <div 
-      className="w-full h-80 p-5 rounded-xl shadow-lg flex flex-col border" 
+      className="w-full h-80 p-5 rounded-xl shadow-lg flex flex-col border animate-slide-in" 
       style={{ 
         backgroundColor: COLOR_CARD_BASE, // White background (Inner)
         color: COLOR_NAVY_TEXT,            // Dark Navy text
-        borderColor: COLOR_BORDER          
+        borderColor: COLOR_BORDER, 
+        // --- ANIMATION STYLES ADDED HERE ---
+        // Requires 'slideInFromTop' keyframes defined globally (see note below)
+        animation: `slideInFromTop 0.5s ease-out forwards`,
+        animationDelay: '0.1s', // Small delay to prevent flash of unstyled content
+        opacity: 0, // Start invisible before animation
+        // ------------------------------------
       }}
     >
       
@@ -110,3 +116,17 @@ export default function ChartCard({ data = [] }) {
     </div>
   );
 }
+
+/*
+  ----------------------------------------------------------------------
+  ⚠️ IMPORTANT SETUP NOTE FOR ANIMATION ⚠️
+  ----------------------------------------------------------------------
+
+  For the 'slideInFromTop' animation to work, you MUST define the following 
+  keyframes in your GLOBAL CSS file (e.g., index.css or global.css):
+
+  @keyframes slideInFromTop {
+    0% { transform: translateY(-20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+*/

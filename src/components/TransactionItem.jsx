@@ -32,18 +32,6 @@ const TrashIcon = ({ className, style, onMouseOver, onMouseOut }) => (
     </svg>
 );
 
-// --- CSS Keyframes for Slide-In/Fade-In (usually in an external CSS file) ---
-// Note: In a real project, define these keyframes in your index.css or global stylesheet.
-// For this example, we assume this animation class is available globally via Tailwind configuration.
-/*
-  @keyframes slideInFromTop {
-    0% { transform: translateY(-20px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-  }
-  .animate-slide-in {
-    animation: slideInFromTop 0.5s ease-out;
-  }
-*/
 
 
 export default function TransactionItem({ tx, onDelete }) {
