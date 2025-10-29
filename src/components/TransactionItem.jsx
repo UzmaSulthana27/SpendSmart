@@ -1,12 +1,13 @@
-// ❌ ERROR FIX: Replaced external icon import with inline SVG to ensure compilation.
 import React from "react";
 
-// --- COLOR PALETTE DEFINITIONS (Using the dark theme context) ---
-const COLOR_NAVY = "#1d2e4a";       // Card Background
-const COLOR_EMERALD = "#10B981";    // Income
-const COLOR_RED = "#E11D48";        // Expense
-const COLOR_TEXT_WHITE = "#E5E7EB"; // Primary Text Color
-const COLOR_ACCENT_GRAY = "#A0AEC0"; // Lighter gray for categories/dates
+// --- COLOR PALETTE DEFINITIONS (Light Card Theme) ---
+const COLOR_CARD_BASE = "#FFFFFF";        // White card background
+const COLOR_NAVY_TEXT = "#1d2e4a";        // Dark Navy text color
+const COLOR_EMERALD = "#10B981";          // Income (Vibrant Green)
+const COLOR_RED = "#E11D48";              // Expense (Vibrant Red)
+const COLOR_ACCENT_GRAY = "#6B7280";      // Darker gray for categories/dates
+const COLOR_LIGHT_HOVER = "#F3F4F6";      // Light gray for hover background
+const COLOR_BORDER_DEFAULT = "#E5E7EB";   // Light border color
 // -----------------------------------
 
 // Inline SVG for the trash icon (FiTrash2 equivalent)
@@ -31,61 +32,87 @@ const TrashIcon = ({ className, style, onMouseOver, onMouseOut }) => (
     </svg>
 );
 
+// --- CSS Keyframes for Slide-In/Fade-In (usually in an external CSS file) ---
+// Note: In a real project, define these keyframes in your index.css or global stylesheet.
+// For this example, we assume this animation class is available globally via Tailwind configuration.
+/*
+  @keyframes slideInFromTop {
+    0% { transform: translateY(-20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+  .animate-slide-in {
+    animation: slideInFromTop 0.5s ease-out;
+  }
+*/
+
 
 export default function TransactionItem({ tx, onDelete }) {
-  // 💡 FIX: Add defensive check for undefined or null tx prop to prevent "Cannot read properties of undefined" error
-  if (!tx || typeof tx.amount === 'undefined') {
-      return null; 
-  }
-    
-  const amountColor = tx.type === "income" ? COLOR_EMERALD : COLOR_RED;
   
-  return (
-    <div 
-      // Dark card background, sharp shadow, and padding
-      className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl shadow-lg transition-shadow duration-300 w-full border border-transparent hover:border-white/10" 
-      style={{ backgroundColor: COLOR_NAVY }}
-    >
-      
-      {/* Description & Category */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+    if (!tx || typeof tx.amount === 'undefined') {
+        return null; 
+    }
+    
+    const amountColor = tx.type === "income" ? COLOR_EMERALD : COLOR_RED;
+    
+    return (
+      <div 
+        // 1. ANIMATION CLASS ADDED: 'animate-slide-in' (Requires global CSS definition)
+        // 2. White card background, subtle shadow, responsive layout
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl shadow-md transition-all duration-300 w-full border animate-slide-in" 
+        style={{ 
+          backgroundColor: COLOR_CARD_BASE,
+          borderColor: COLOR_BORDER_DEFAULT,
+          // --- Fallback/Inline style for animation (Less ideal, but for demonstration) ---
+          animation: 'slideInFromTop 0.5s ease-out',
+        }}
+      >
         
-        {/* Description: White text for high contrast */}
-        <div className="font-medium" style={{ color: COLOR_TEXT_WHITE }}>
-          {tx.description}
+        {/* Description & Category */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+          
+          {/* Description: Dark Navy text for high contrast */}
+          <div className="font-medium" style={{ color: COLOR_NAVY_TEXT }}>
+            {tx.description}
+          </div>
+          
+          {/* Category & Date: Lighter accent color */}
+          <div className="text-sm" style={{ color: COLOR_ACCENT_GRAY }}>
+            {tx.category || "General"} • {new Date(tx.date).toLocaleString()}
+          </div>
         </div>
-        
-        {/* Category & Date: Lighter accent color */}
-        <div className="text-sm" style={{ color: COLOR_ACCENT_GRAY }}>
-          {tx.category || "General"} • {new Date(tx.date).toLocaleString()}
-        </div>
-      </div>
 
-      {/* Amount & Delete */}
-      <div className="flex items-center gap-4 mt-2 sm:mt-0">
-        <div
-          // Amount: Dynamic color based on transaction type
-          className={`font-bold text-lg`}
-          style={{ color: amountColor }}
-        >
-          {tx.type === "income" ? "+" : "-"}${Number(tx.amount).toFixed(2)}
+        {/* Amount & Delete */}
+        <div className="flex items-center gap-4 mt-2 sm:mt-0">
+          <div
+            // Amount: Dynamic color based on transaction type
+            className={`font-bold text-lg transition-colors duration-300`}
+            style={{ color: amountColor }}
+          >
+            {tx.type === "income" ? "+" : "-"}${Number(tx.amount).toFixed(2)}
+          </div>
+          
+          {/* Delete Button with Hover Effect (Dynamic) */}
+          <button
+            onClick={() => onDelete(tx.id)}
+            className="p-2 rounded-full transition-colors duration-200"
+            style={{ color: COLOR_ACCENT_GRAY }}
+            aria-label="Delete"
+          >
+            <TrashIcon 
+              className="w-5 h-5 transition-transform duration-200 hover:scale-110" 
+              style={{ color: COLOR_ACCENT_GRAY }} 
+              onMouseOver={e => {
+                e.currentTarget.style.color = COLOR_RED;
+                e.currentTarget.parentElement.style.backgroundColor = COLOR_LIGHT_HOVER;
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.color = COLOR_ACCENT_GRAY;
+                e.currentTarget.parentElement.style.backgroundColor = 'transparent';
+              }}
+            />
+          </button>
         </div>
-        
-        {/* Delete Button */}
-        <button
-          onClick={() => onDelete(tx.id)}
-          // Clear hover background, using Red for the hover state
-          className="p-2 rounded-full transition-colors duration-200"
-          aria-label="Delete"
-        >
-          <TrashIcon 
-            className="w-5 h-5 transition-colors duration-200" 
-            style={{ color: COLOR_ACCENT_GRAY }} 
-            onMouseOver={e => e.currentTarget.style.color = COLOR_RED}
-            onMouseOut={e => e.currentTarget.style.color = COLOR_ACCENT_GRAY}
-          />
-        </button>
       </div>
-    </div>
-  );
+    );
 }
+
