@@ -1,80 +1,93 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 
-const KEY = "spendsmart_transactions";
+// --- Default Currency Definition ---
+const DEFAULT_CURRENCY = { code: 'USD', symbol: '$' };
 
-function loadTransactionsFromStorage() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
+// Initial Context State (including new currency values)
+const ExpenseContext = createContext({
+    transactions: [],
+    income: 0,
+    expense: 0,
+    balance: 0,
+    chartData: [],
+    currency: DEFAULT_CURRENCY, // 👈 New: Default currency
+    addTransaction: () => {},
+    removeTransaction: () => {},
+    updateCurrency: () => {}, // 👈 New: Function to update currency
+});
 
-function saveTransactionsToStorage(list) {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(list));
-  } catch {
-    // ignore write errors
-  }
-}
+export const useExpense = () => useContext(ExpenseContext);
 
-function generateId() {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
-}
+// Load initial transactions from localStorage or use a default set
+const loadInitialTransactions = () => {
+    try {
+        const stored = localStorage.getItem('expense_tracker_transactions');
+        return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+        console.error("Could not load transactions from local storage", error);
+        return [];
+    }
+};
 
-const ExpenseContext = createContext(null);
+export const ExpenseProvider = ({ children }) => {
+    const [transactions, setTransactions] = useState(loadInitialTransactions);
+    const [currency, setCurrency] = useState(DEFAULT_CURRENCY); // 👈 New State
 
-export function ExpenseProvider({ children }) {
-  const [transactions, setTransactions] = useState([]);
+    // Helper function to save to localStorage
+    const saveTransactions = useCallback((newTxs) => {
+        setTransactions(newTxs);
+        localStorage.setItem('expense_tracker_transactions', JSON.stringify(newTxs));
+    }, []);
 
-  useEffect(() => {
-    setTransactions(loadTransactionsFromStorage());
-  }, []);
+    const addTransaction = useCallback((tx) => {
+        const newTx = { id: Date.now(), date: new Date().toISOString(), ...tx };
+        saveTransactions([newTx, ...transactions]);
+    }, [transactions, saveTransactions]);
 
-  function addTransaction(tx) {
-    const newTx = { id: generateId(), ...tx };
-    const updated = [newTx, ...transactions];
-    setTransactions(updated);
-    saveTransactionsToStorage(updated);
-    return updated;
-  }
+    const removeTransaction = useCallback((id) => {
+        saveTransactions(transactions.filter(tx => tx.id !== id));
+    }, [transactions, saveTransactions]);
 
-  function removeTransaction(id) {
-    const updated = transactions.filter((t) => t.id !== id);
-    setTransactions(updated);
-    saveTransactionsToStorage(updated);
-    return updated;
-  }
+    // New function to update currency
+    const updateCurrency = useCallback((newCurrency) => {
+        setCurrency(newCurrency);
+    }, []);
+    
+    // Recalculate summary data whenever transactions change
+    const { income, expense, balance, chartData } = useMemo(() => {
+        const income = transactions
+            .filter(t => t.type === 'income')
+            .reduce((sum, t) => sum + t.amount, 0);
+        
+        const expense = transactions
+            .filter(t => t.type === 'expense')
+            .reduce((sum, t) => sum + t.amount, 0);
 
-  const income = transactions
-    .filter((t) => t.type === "income")
-    .reduce((s, n) => s + Number(n.amount), 0);
+        const balance = income - expense;
 
-  const expense = transactions
-    .filter((t) => t.type === "expense")
-    .reduce((s, n) => s + Number(n.amount), 0);
+        const chartData = [
+            { name: 'Income', value: income || 1 }, // Ensure chart renders if 0
+            { name: 'Expense', value: expense || 1 },
+        ];
 
-  const chartData = [
-    { name: "Income", value: +income.toFixed(2) },
-    { name: "Expense", value: +expense.toFixed(2) },
-  ];
+        return { income, expense, balance, chartData };
+    }, [transactions]);
 
-  const value = {
-    transactions,
-    addTransaction,
-    removeTransaction,
-    income,
-    expense,
-    balance: income - expense,
-    chartData,
-  };
+    const contextValue = useMemo(() => ({
+        transactions,
+        income,
+        expense,
+        balance,
+        chartData,
+        currency,           // 👈 Expose currency state
+        addTransaction,
+        removeTransaction,
+        updateCurrency,     // 👈 Expose update function
+    }), [transactions, income, expense, balance, chartData, currency, addTransaction, removeTransaction, updateCurrency]);
 
-  return <ExpenseContext.Provider value={value}>{children}</ExpenseContext.Provider>;
-}
-
-export function useExpense() {
-  const ctx = useContext(ExpenseContext);
-  if (!ctx) throw new Error("useExpense must be used within ExpenseProvider");
-  return ctx;
-}
+    return (
+        <ExpenseContext.Provider value={contextValue}>
+            {children}
+        </ExpenseContext.Provider>
+    );
+};

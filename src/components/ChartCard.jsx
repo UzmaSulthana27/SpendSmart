@@ -1,21 +1,19 @@
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import { useExpense } from "../context/ExpenseContext"; // 👈 New Import
 
 // --- COLOR PALETTE DEFINITIONS (Light Theme with Dark Navy Text) ---
-const COLOR_CARD_BASE = "#FFFFFF";        // White background
-const COLOR_NAVY_TEXT = "#1d2e4a";        // Dark Navy text color
-const COLOR_SKY_BLUE = "#0284C7";         // Accent for Net Balance Label
-const COLOR_EMERALD = "#10B981";          // Income (Vibrant Green)
-const COLOR_RED = "#E11D48";              // Expense (Vibrant Red)
-const COLOR_BORDER = "#E5E7EB";           // Light border/separator color
+const COLOR_CARD_BASE = "#FFFFFF";       
+const COLOR_NAVY_TEXT = "#1d2e4a";        
+const COLOR_SKY_BLUE = "#0284C7";         
+const COLOR_EMERALD = "#10B981";          
+const COLOR_RED = "#E11D48";              
+const COLOR_BORDER = "#E5E7EB";           
 // -----------------------------------
 
-/**
- * Simple Income vs Expense pie chart with net balance display in the center.
- * This component now includes a slide-in animation on render.
- * props.data = [{ name: 'Income', value: 100 }, { name: 'Expense', value: 50 }]
- */
 export default function ChartCard({ data = [] }) {
+  // 👈 Access the dynamic currency symbol
+  const { currency } = useExpense();
   const COLORS = [COLOR_EMERALD, COLOR_RED];
 
   // Calculate Net Balance for the center display
@@ -25,23 +23,19 @@ export default function ChartCard({ data = [] }) {
   const netBalanceColor = netBalance >= 0 ? COLOR_EMERALD : COLOR_RED; 
 
   return (
-    // Card Container: White background, Dark Navy text, subtle shadow and border
     <div 
       className="w-full h-80 p-5 rounded-xl shadow-lg flex flex-col border animate-slide-in" 
       style={{ 
-        backgroundColor: COLOR_CARD_BASE, // White background (Inner)
-        color: COLOR_NAVY_TEXT,            // Dark Navy text
+        backgroundColor: COLOR_CARD_BASE,
+        color: COLOR_NAVY_TEXT,
         borderColor: COLOR_BORDER, 
-        // --- ANIMATION STYLES ADDED HERE ---
-        // Requires 'slideInFromTop' keyframes defined globally (see note below)
+        // Slide-in animation on render
         animation: `slideInFromTop 0.5s ease-out forwards`,
-        animationDelay: '0.1s', // Small delay to prevent flash of unstyled content
-        opacity: 0, // Start invisible before animation
-        // ------------------------------------
+        animationDelay: '0.1s',
+        opacity: 0, 
       }}
     >
       
-      {/* Title (Dark Navy Text) */}
       <h3 className="text-xl font-bold mb-4 text-center" style={{ color: COLOR_NAVY_TEXT }}>
         Income vs. Expense Breakdown
       </h3>
@@ -63,23 +57,23 @@ export default function ChartCard({ data = [] }) {
                 <Cell 
                   key={`cell-${idx}`} 
                   fill={COLORS[idx % COLORS.length]} 
-                  // Stroke matches the card background for clean separation
                   stroke={COLOR_CARD_BASE} 
                   strokeWidth={2}
                 />
               ))}
             </Pie>
             
-            {/* Tooltip Styling (White background, Dark Navy Text) */}
+            {/* Tooltip Styling: Uses dynamic currency symbol */}
             <Tooltip 
               formatter={(value, name, props) => {
                 const dataName = props.payload && props.payload.length ? props.payload[0].name : 'Amount';
-                return [`$${Number(value).toFixed(2)}`, dataName];
+                // 👈 Use dynamic currency symbol
+                return [`${currency.symbol}${Number(value).toFixed(2)}`, dataName]; 
               }}
               contentStyle={{ 
                 backgroundColor: COLOR_CARD_BASE, 
                 border: `1px solid ${COLOR_SKY_BLUE}`, 
-                color: COLOR_NAVY_TEXT, // Dark Navy text
+                color: COLOR_NAVY_TEXT,
                 borderRadius: '8px',
                 padding: '8px',
                 fontSize: '14px' 
@@ -89,20 +83,19 @@ export default function ChartCard({ data = [] }) {
           </PieChart>
         </ResponsiveContainer>
 
-        {/* Unique Feature: Net Balance Display in Center */}
+        {/* Net Balance Display in Center: Uses dynamic currency symbol */}
         <div 
           className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
         >
-          {/* Net Balance Label: Sky Blue */}
           <div className="text-sm font-medium opacity-80 mb-1" style={{ color: COLOR_SKY_BLUE }}>NET BALANCE</div>
-          {/* Net Balance Value: Green/Red */}
           <div className="text-xl font-extrabold transition-colors duration-500" style={{ color: netBalanceColor }}>
-            ${netBalance.toFixed(2)}
+            {/* 👈 Use dynamic currency symbol */}
+            {currency.symbol}{netBalance.toFixed(2)}
           </div>
         </div>
       </div>
       
-      {/* Custom Legend (Dark Navy Text) */}
+      {/* Custom Legend */}
       <div className="flex justify-center gap-6 mt-4 pt-3 border-t" style={{ borderColor: COLOR_BORDER }}>
         <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLOR_EMERALD }}></div>
@@ -116,17 +109,3 @@ export default function ChartCard({ data = [] }) {
     </div>
   );
 }
-
-/*
-  ----------------------------------------------------------------------
-  ⚠️ IMPORTANT SETUP NOTE FOR ANIMATION ⚠️
-  ----------------------------------------------------------------------
-
-  For the 'slideInFromTop' animation to work, you MUST define the following 
-  keyframes in your GLOBAL CSS file (e.g., index.css or global.css):
-
-  @keyframes slideInFromTop {
-    0% { transform: translateY(-20px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-  }
-*/

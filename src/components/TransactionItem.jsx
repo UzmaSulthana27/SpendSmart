@@ -1,13 +1,14 @@
 import React from "react";
+import { useExpense } from "../context/ExpenseContext"; // 👈 New Import
 
 // --- COLOR PALETTE DEFINITIONS (Light Card Theme) ---
-const COLOR_CARD_BASE = "#FFFFFF";        // White card background
-const COLOR_NAVY_TEXT = "#1d2e4a";        // Dark Navy text color
-const COLOR_EMERALD = "#10B981";          // Income (Vibrant Green)
-const COLOR_RED = "#E11D48";              // Expense (Vibrant Red)
-const COLOR_ACCENT_GRAY = "#6B7280";      // Darker gray for categories/dates
-const COLOR_LIGHT_HOVER = "#F3F4F6";      // Light gray for hover background
-const COLOR_BORDER_DEFAULT = "#E5E7EB";   // Light border color
+const COLOR_CARD_BASE = "#FFFFFF";        
+const COLOR_NAVY_TEXT = "#1d2e4a";        
+const COLOR_EMERALD = "#10B981";          
+const COLOR_RED = "#E11D48";              
+const COLOR_ACCENT_GRAY = "#6B7280";      
+const COLOR_LIGHT_HOVER = "#F3F4F6";      
+const COLOR_BORDER_DEFAULT = "#E5E7EB";   
 // -----------------------------------
 
 // Inline SVG for the trash icon (FiTrash2 equivalent)
@@ -33,9 +34,10 @@ const TrashIcon = ({ className, style, onMouseOver, onMouseOut }) => (
 );
 
 
-
 export default function TransactionItem({ tx, onDelete }) {
-  
+    // 👈 Access the dynamic currency symbol
+    const { currency } = useExpense(); 
+
     if (!tx || typeof tx.amount === 'undefined') {
         return null; 
     }
@@ -44,26 +46,20 @@ export default function TransactionItem({ tx, onDelete }) {
     
     return (
       <div 
-        // 1. ANIMATION CLASS ADDED: 'animate-slide-in' (Requires global CSS definition)
-        // 2. White card background, subtle shadow, responsive layout
-        className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl shadow-md transition-all duration-300 w-full border animate-slide-in" 
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl shadow-md transition-all duration-300 w-full border" 
         style={{ 
           backgroundColor: COLOR_CARD_BASE,
           borderColor: COLOR_BORDER_DEFAULT,
-          // --- Fallback/Inline style for animation (Less ideal, but for demonstration) ---
+          // Slide-in animation for list entry
           animation: 'slideInFromTop 0.5s ease-out',
         }}
       >
         
         {/* Description & Category */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
-          
-          {/* Description: Dark Navy text for high contrast */}
           <div className="font-medium" style={{ color: COLOR_NAVY_TEXT }}>
             {tx.description}
           </div>
-          
-          {/* Category & Date: Lighter accent color */}
           <div className="text-sm" style={{ color: COLOR_ACCENT_GRAY }}>
             {tx.category || "General"} • {new Date(tx.date).toLocaleString()}
           </div>
@@ -72,14 +68,13 @@ export default function TransactionItem({ tx, onDelete }) {
         {/* Amount & Delete */}
         <div className="flex items-center gap-4 mt-2 sm:mt-0">
           <div
-            // Amount: Dynamic color based on transaction type
             className={`font-bold text-lg transition-colors duration-300`}
             style={{ color: amountColor }}
           >
-            {tx.type === "income" ? "+" : "-"}${Number(tx.amount).toFixed(2)}
+            {/* 👈 Use dynamic currency symbol */}
+            {tx.type === "income" ? "+" : "-"}{currency.symbol}{Number(tx.amount).toFixed(2)}
           </div>
           
-          {/* Delete Button with Hover Effect (Dynamic) */}
           <button
             onClick={() => onDelete(tx.id)}
             className="p-2 rounded-full transition-colors duration-200"
@@ -87,7 +82,7 @@ export default function TransactionItem({ tx, onDelete }) {
             aria-label="Delete"
           >
             <TrashIcon 
-              className="w-5 h-5 transition-transform duration-200 hover:scale-110" 
+              className="w-5 h-5 transition-transform duration-200 hover:scale-110"
               style={{ color: COLOR_ACCENT_GRAY }} 
               onMouseOver={e => {
                 e.currentTarget.style.color = COLOR_RED;
@@ -103,4 +98,3 @@ export default function TransactionItem({ tx, onDelete }) {
       </div>
     );
 }
-

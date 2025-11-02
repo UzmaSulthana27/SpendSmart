@@ -6,6 +6,7 @@ import ChartCard from "./components/ChartCard";
 import TransactionForm from "./components/TransactionForm";
 import TransactionsList from "./components/TransactionsList";
 import { ExpenseProvider, useExpense } from "./context/ExpenseContext";
+import UserSettings from "./components/UserSettings";
 
 /* Small in-file page components using existing components in /src/components */
 
@@ -70,6 +71,14 @@ function TransactionsView() {
   );
 }
 
+function SettingsView() {
+    return (
+        <div>
+            <UserSettings />
+        </div>
+    );
+}
+
 // Main App Component
 export default function App() {
   return (
@@ -83,6 +92,7 @@ export default function App() {
               <Route path="/" element={<DashboardView />} />
               <Route path="/add" element={<AddView />} />
               <Route path="/transactions" element={<TransactionsView />} />
+              <Route path="/settings" element={<SettingsView />} /> {/* 👈 New Route */}
             </Routes>
           </main>
         </div>
